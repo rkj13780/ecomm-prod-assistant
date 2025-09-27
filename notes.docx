@@ -1,6 +1,5 @@
 Project-Github-Link: https://github.com/sunnysavita10/ecomm-prod-assistant
 
-
 These are all the commands which you need to run on your command prompt
 
 Write python on your terminal
@@ -21,13 +20,32 @@ Note: please use either 3.10 or 3.11 or 3.12
 Command Prompt (CMD)  .\<your-env-nanme>\Scripts\activate.bat
 Git Bash ya WSL terminal  or MAC Terminal:
 source <your-env-nanme>/Scripts/activate
-
+uv pip install -r .\requirements.txt
 
 18. If your git is asking for login to publish the repo execute this below command
 git config --global user.name "Your Name"
-git config --global user.email "your-email@example.com"   //git config commit.gpgsign false
+git config --global user.email "your-email@example.com"
 19. Uv add <package_name>
 20. Uv add -r requirements.txt
 21. Streamlit run <give your streamlit python filename>
 22. Install live server extension in vs code for testing the html
+
+
+
+
+For accessing the DataStax, here is a link: https://accounts.datastax.com/session-service/v1/login
+
+Vectordb Comparison: https://superlinked.com/vector-db-comparison
+
+One you will login to datastax vector page you will get the below page
+
+Git repo: 
+Project-Github-Link: https://github.com/sunnysavita10/ecomm-prod-assistant
+https://github.com/sunnysavita10/document_portal
+Note Link:
+https://docs.google.com/document/d/1S51yj-kZ2G1otA2u5ilsPFkEXxJGJaOKadZJkSL3IKc/preview?tab=t.0
+
+
+
+14th septumber 25 chat: 
 

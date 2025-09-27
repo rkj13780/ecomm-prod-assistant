@@ -12,3 +12,21 @@ git config --local user.email "rakeshonrediff@gmail.com"
   git config user.name "Rakesh Kumar"
   git config user.email "rakeshonrediff@gmail.com"
 git config commit.gpgsign false
+
+
+Ctr+shif + P then choose reload windows
+
+===========================
+…or create a new repository on the command line
+echo "# mcptutorial" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/rkj13780/mcptutorial.git
+git push -u origin main
+
+…or push an existing repository from the command line
+git remote add origin https://github.com/rkj13780/mcptutorial.git
+git branch -M main
+git push -u origin main
