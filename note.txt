@@ -4,6 +4,7 @@ Git repo: https://github.com/sunnysavita10/document_portal
 Note Link:
 https://docs.google.com/document/d/1S51yj-kZ2G1otA2u5ilsPFkEXxJGJaOKadZJkSL3IKc/preview?tab=t.0
 
+Sunny eamail id=> snshrivaa3365@gmail.com
 
 git config --local user.name "rkj13780"
 git config --local user.email "rakeshonrediff@gmail.com"

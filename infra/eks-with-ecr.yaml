@@ -7,7 +7,7 @@ Parameters:
     Default: product-assistant-cluster
   NodeInstanceType:
     Type: String
-    Default: t3.medium
+    Default: t3.micro
   DesiredCapacity:
     Type: Number
     Default: 2
