@@ -12,45 +12,41 @@ import asyncio
 
 
 class ApiKeyManager:
-    REQUIRED_KEYS = ["GROQ_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY"]
-
     def __init__(self):
         self.api_keys = {}
-        raw = os.getenv("API_KEYS")
 
+        raw = os.getenv("API_KEYS")
         if raw:
             try:
                 parsed = json.loads(raw)
-                if not isinstance(parsed, dict):
-                    raise ValueError("API_KEYS is not a valid JSON object")
-                self.api_keys = parsed
-                log.info("Loaded API_KEYS from ECS secret")
+                if isinstance(parsed, dict):
+                    self.api_keys = parsed
+                    log.info("Loaded API_KEYS JSON")
             except Exception as e:
-                log.warning("Failed to parse API_KEYS as JSON", error=str(e))
+                log.warning("Failed to parse API_KEYS JSON", error=str(e))
 
-        # Fallback to individual env vars
-        for key in self.REQUIRED_KEYS:
+        # Decide required keys dynamically
+        required = ["GOOGLE_API_KEY"]
+        provider = os.getenv("LLM_PROVIDER", "openai").lower()
+        if provider == "openai":
+            required.append("OPENAI_API_KEY")
+        elif provider == "groq":
+            required.append("GROQ_API_KEY")
+        elif provider == "google":
+            required.append("GOOGLE_API_KEY")
+
+        # Load from env if not in API_KEYS JSON
+        for key in required:
             if not self.api_keys.get(key):
-                env_val = os.getenv(key)
-                if env_val:
-                    self.api_keys[key] = env_val
-                    log.info(f"Loaded {key} from individual env var")
+                val = os.getenv(key)
+                if val:
+                    self.api_keys[key] = val
+                    log.info(f"Loaded {key} from env")
 
         # Final check
-        missing = [k for k in self.REQUIRED_KEYS if not self.api_keys.get(k)]
+        missing = [k for k in required if not self.api_keys.get(k)]
         if missing:
-            log.error("Missing required API keys", missing_keys=missing)
-            raise ProductAssistantException("Missing API keys", sys)
-
-        log.info("API keys loaded", keys={k: v[:6] + "..." for k, v in self.api_keys.items()})
-
-
-    def get(self, key: str) -> str:
-        val = self.api_keys.get(key)
-        if not val:
-            raise KeyError(f"API key for {key} is missing")
-        return val
-
+            raise ProductAssistantException(f"Missing API keys: {missing}", sys)
 
 class ModelLoader:
     """
