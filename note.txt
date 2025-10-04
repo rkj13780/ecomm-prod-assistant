@@ -31,3 +31,11 @@ git push -u origin main
 git remote add origin https://github.com/rkj13780/mcptutorial.git
 git branch -M main
 git push -u origin main
+
+
+----------------------------
+
+ECR_REGISTRY=<account-id>.dkr.ecr.<aws_region>.amazonaws.com
+
+ECR_REGISTRY=778511510694.dkr.ecr.us-east-2.amazonaws.com
+
