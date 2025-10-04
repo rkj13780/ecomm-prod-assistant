@@ -13,40 +13,24 @@ import asyncio
 
 class ApiKeyManager:
     def __init__(self):
-        self.api_keys = {}
+        self.api_keys = {
+            "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
+            "GOOGLE_API_KEY": os.getenv("GOOGLE_API_KEY"),
+            "GROQ_API_KEY": os.getenv("GROQ_API_KEY"),
+            "ASTRA_DB_API_ENDPOINT": os.getenv("ASTRA_DB_API_ENDPOINT"),
+            "ASTRA_DB_APPLICATION_TOKEN": os.getenv("ASTRA_DB_APPLICATION_TOKEN"),
+            "ASTRA_DB_KEYSPACE": os.getenv("ASTRA_DB_KEYSPACE"),
+        }
 
-        raw = os.getenv("API_KEYS")
-        if raw:
-            try:
-                parsed = json.loads(raw)
-                if isinstance(parsed, dict):
-                    self.api_keys = parsed
-                    log.info("Loaded API_KEYS JSON")
-            except Exception as e:
-                log.warning("Failed to parse API_KEYS JSON", error=str(e))
+        # Just log loaded keys (don't print actual values)
+        for key, val in self.api_keys.items():
+            if val:
+                log.info(f"{key} loaded from environment")
+            else:
+                log.warning(f"{key} is missing from environment")
 
-        # Decide required keys dynamically
-        required = ["GOOGLE_API_KEY"]
-        provider = os.getenv("LLM_PROVIDER", "openai").lower()
-        if provider == "openai":
-            required.append("OPENAI_API_KEY")
-        elif provider == "groq":
-            required.append("GROQ_API_KEY")
-        elif provider == "google":
-            required.append("GOOGLE_API_KEY")
-
-        # Load from env if not in API_KEYS JSON
-        for key in required:
-            if not self.api_keys.get(key):
-                val = os.getenv(key)
-                if val:
-                    self.api_keys[key] = val
-                    log.info(f"Loaded {key} from env")
-
-        # Final check
-        missing = [k for k in required if not self.api_keys.get(k)]
-        if missing:
-            raise ProductAssistantException(f"Missing API keys: {missing}", sys)
+    def get(self, key: str):
+        return self.api_keys.get(key)
 
 class ModelLoader:
     """
@@ -54,12 +38,6 @@ class ModelLoader:
     """
 
     def __init__(self):
-        if os.getenv("ENV", "local").lower() != "production":
-            load_dotenv()
-            log.info("Running in LOCAL mode: .env loaded")
-        else:
-            log.info("Running in PRODUCTION mode")
-
         self.api_key_mgr = ApiKeyManager()
         self.config = load_config()
         log.info("YAML config loaded", config_keys=list(self.config.keys()))
