@@ -35,22 +35,28 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Set Image Tag
+        id: image-tag
+        run: |
+          echo "IMAGE_TAG=$(date +%s)" >> $GITHUB_ENV
+          echo "::set-output name=tag::$(date +%s)"
+      
       # Build, tag and push Docker image to ECR
       - name: Build and Push Docker image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
           REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ steps.image-tag.outputs.tag }}
         run: |
-          IMAGE_TAG=latest
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:latest
 
       # Setup kubectl
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
-
 
       # Ensure AWS CLI is installed
       - name: Install AWS CLI
@@ -63,13 +69,7 @@ jobs:
       - name: Print Env Vars
         run: |
           echo "Region: ${{ secrets.AWS_REGION }}"
-          echo "Cluster: ${{ secrets.EKS_CLUSTER_NAME }}"
-
-      # Debug: Print AWS default region
-      - name: Print AWS region
-        run: |
-          echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION"
-          echo "AWS_REGION=$AWS_REGION"    
+          echo "Cluster: ${{ secrets.EKS_CLUSTER_NAME }}"  
       
       # Update kubeconfig
       - name: Update kubeconfig with debug
@@ -100,17 +100,26 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
 
       # Deploy manifests
-      - name: Deploy to EKS
+      - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8/deployment.yaml
           kubectl apply -f k8/service.yaml
+
+      - name: Patch deployment with new image tag
+        env:
+          REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ steps.image-tag.outputs.tag }}
+        run: |
+          kubectl set image deployment/product-assistant product-assistant=$REGISTRY/$REPOSITORY:$IMAGE_TAG
+
 
       # Verify rollout
       - name: Verify Deployment
         run: |
           set -e
           if ! kubectl rollout status deployment/product-assistant --timeout=120s; then
-            echo "❌ Rollout failed, collecting debug info..."
+            echo "Rollout failed, collecting debug info..."
             kubectl describe deployment product-assistant || true
             kubectl get pods -o wide || true
             for pod in $(kubectl get pods -l app=product-assistant -o jsonpath='{.items[*].metadata.name}'); do
