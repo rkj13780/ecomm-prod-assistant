@@ -39,6 +39,6 @@ ECR_REGISTRY=<account-id>.dkr.ecr.<aws_region>.amazonaws.com
 
 ECR_REGISTRY=778511510694.dkr.ecr.us-east-2.amazonaws.com
 
-aws eks update-kubeconfig --name product-assistant-cluster --region us-east-2
+aws eks update-kubeconfig --name product-assistant-cluster --region us-east-1
 
 
