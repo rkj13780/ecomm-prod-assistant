@@ -1,19 +1,12 @@
 import asyncio
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
-import sys
-import asyncio
-
-if sys.platform.startswith("win"):
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-
 async def main():
     client = MultiServerMCPClient({
         "hybrid_search": {   # server name
             "command": "python",
             "args": [
-                r"C:\test\llm-ops-kn\ecomm-prod-assistant\prod_assistant\mcp_servers\product_search_server.py"
+                r"D:\complete_content_new\llmops-batch\ecomm-prod-assistant\prod_assistant\mcp_servers\product_search_server.py"
             ],  # absolute path
             "transport": "stdio",
         }
@@ -37,7 +30,6 @@ async def main():
     # --- Step 2: Fallback to web search if retriever fails ---
     if not retriever_result.strip() or "No local results found." in retriever_result:
         print("\n No local results, falling back to web search...\n")
-        #web_result= web_tool.ainvoke({"query": query})
         web_result = await web_tool.ainvoke({"query": query})
         print("Web Search Result:\n", web_result)
 
